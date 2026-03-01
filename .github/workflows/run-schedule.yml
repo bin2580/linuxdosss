@@ -47,8 +47,10 @@ name: Run Schedule
 on:
   # 定时触发（默认每天北京时间 8:00 和 20:00 各运行一次）
   schedule:
-    - cron: '0 0 * * *'   # UTC 0:00 = 北京时间 8:00
+    - cron: '0 3 * * *'   # UTC 0:00 = 北京时间 8:00
     - cron: '0 12 * * *'  # UTC 12:00 = 北京时间 20:00
+    - cron: '0 19 * * *'   # UTC 0:00 = 北京时间 8:00
+
 
   # 手动触发
   workflow_dispatch:
@@ -56,7 +58,7 @@ on:
       topics:
         description: '浏览帖子数量'
         required: false
-        default: '30'
+        default: '100'
       like_rate:
         description: '点赞概率 (0-100)'
         required: false
@@ -91,7 +93,12 @@ jobs:
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-
+           - name: Random delay (30-90 seconds)
+        run: |
+          # 生成30-90秒之间的随机数
+          DELAY=$((10 + RANDOM % 61))
+          echo "将延时 ${DELAY} 秒后开始执行..."
+          sleep ${DELAY}
       # 运行脚本
       - name: Run browse script
         env:
