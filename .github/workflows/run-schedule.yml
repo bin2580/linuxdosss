@@ -47,11 +47,9 @@ name: Run Schedule
 on:
   # 定时触发（默认每天北京时间 8:00 和 20:00 各运行一次）
   schedule:
-    - cron: '0 3 * * *'   # UTC 0:00 = 北京时间 8:00
-    - cron: '0 12 * * *'  # UTC 12:00 = 北京时间 20:00
-    - cron: '0 19 * * *'   # UTC 0:00 = 北京时间 8:00
-
-
+    - cron: '0 19 * * *'   # UTC 19:00 = 北京时间 次日 03:00
+    - cron: '0 0 * * *'    # UTC 00:00 = 北京时间 08:00
+    - cron: '0 7 * * *'    # UTC 07:00 = 北京时间 15:00
   # 手动触发
   workflow_dispatch:
     inputs:
@@ -93,10 +91,11 @@ jobs:
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-           - name: Random delay (30-90 seconds)
+      # 30-90秒随机延时
+      - name: Random delay (30-90 seconds)
         run: |
           # 生成30-90秒之间的随机数
-          DELAY=$((10 + RANDOM % 61))
+          DELAY=$((30 + RANDOM % 61))
           echo "将延时 ${DELAY} 秒后开始执行..."
           sleep ${DELAY}
       # 运行脚本
@@ -106,7 +105,7 @@ jobs:
           LINUXDO_PASSWORD: ${{ secrets.LINUXDO_PASSWORD }}
         run: |
           # 获取参数（手动触发时使用输入值，定时触发时使用默认值）
-          TOPICS="${{ github.event.inputs.topics || '30' }}"
+          TOPICS="${{ github.event.inputs.topics || '100' }}"
           LIKE_RATE="${{ github.event.inputs.like_rate || '30' }}"
           
           echo "========================================"
