@@ -1,0 +1,53 @@
+name: Daily Check-in
+
+on:
+  schedule:
+    #- cron: '0 1 * * *'  # 每天1点 UTC 时间执行
+    - cron: '0 */12 * * *'  # 每12小时执行一次
+
+  workflow_dispatch:
+
+jobs:
+  run_script:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: browser-actions/setup-chrome@v1
+      - name: Check Chrome version
+        run: chrome --version
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.19'
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute script
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          LINUXDO_USERNAME: ${{ secrets.LINUXDO_USERNAME }}
+          LINUXDO_PASSWORD: ${{ secrets.LINUXDO_PASSWORD }}
+          GOTIFY_URL: ${{ secrets.GOTIFY_URL }}
+          GOTIFY_TOKEN: ${{ secrets.GOTIFY_TOKEN }}
+          SC3_PUSH_KEY: ${{ secrets.SC3_PUSH_KEY }}
+          WXPUSH_URL: ${{ secrets.WXPUSH_URL }}
+          WXPUSH_TOKEN: ${{ secrets.WXPUSH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LINUXDO_COOKIES: ${{ secrets.LINUXDO_COOKIES }}
+          BROWSE_ENABLED: ${{ secrets.BROWSE_ENABLED }}
+        run: |
+          python main.py
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 10
+          keep_minimum_runs: 6
