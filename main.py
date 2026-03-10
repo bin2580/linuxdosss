@@ -74,7 +74,7 @@ CSRF_URL = "https://linux.do/session/csrf"
 
 class LinuxDoBrowser:
     def __init__(self) -> None:
-        # 初始化浏览器配置（增强反爬）
+        # 初始化浏览器配置（增强反爬，适配DrissionPage API）
         self._init_browser()
         # 初始化请求会话（带反爬头+重试）
         self._init_session()
@@ -82,7 +82,7 @@ class LinuxDoBrowser:
         self.notifier = NotificationManager()
 
     def _init_browser(self):
-        """初始化浏览器（增强反爬配置）"""
+        """初始化浏览器（适配DrissionPage的正确API）"""
         from sys import platform
 
         # 适配不同系统的User-Agent
@@ -97,13 +97,14 @@ class LinuxDoBrowser:
         co = ChromiumOptions()
         # 基础配置
         co.headless(True).incognito(True).set_argument("--no-sandbox")
-        # 反爬关键配置
+        # 反爬关键配置（DrissionPage 正确写法）
         co.set_argument("--disable-blink-features=AutomationControlled")
         co.set_argument("--disable-dev-shm-usage")
         co.set_argument("--disable-gpu")
         co.set_argument("--disable-extensions")
-        co.experimental_option("excludeSwitches", ["enable-automation"])
-        co.experimental_option("useAutomationExtension", False)
+        # DrissionPage 设置实验性选项的正确方法（替换 Selenium 的 experimental_option）
+        co.set_experimental_option("excludeSwitches", ["enable-automation"])
+        co.set_experimental_option("useAutomationExtension", False)
         # 随机User-Agent
         co.set_user_agent(
             f"Mozilla/5.0 ({platformIdentifier}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{random.choice(['130.0.0.0', '142.0.0.0', '148.0.0.0'])} Safari/537.36"
